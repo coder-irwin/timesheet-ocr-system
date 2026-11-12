@@ -14,6 +14,7 @@ or employee record is sent to any external service.
 
 | What you want to do | Read this | How long |
 |---|---|---|
+| **See the whole flow in one map** | [`INDEX.md`](INDEX.md) | 5 min |
 | **See it working on my own machine** | [`RUN-IT-ON-YOUR-COMPUTER.md`](RUN-IT-ON-YOUR-COMPUTER.md) | 20 min |
 | **Put it online for my team** | [`PUT-IT-ONLINE.md`](PUT-IT-ONLINE.md) | ~1 hour |
 | **Understand what it does** | [`01-WHAT-THIS-IS.md`](01-WHAT-THIS-IS.md) | 10 min |
