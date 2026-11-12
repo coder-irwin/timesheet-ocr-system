@@ -43,8 +43,8 @@ truth row, so they were never scored. Of those, 8 failed because the month had
 bled into the employee-name field:
 
 ```
-"APRTL.2026 VIVEK KOMAR"      should be YOGESH RAMAN
-"JITENDNA SINGH APRIL-2026"   should be SANJAY BOSE
+"APRTL.2026 YOGESH RAMAM"     should be YOGESH RAMAN
+"SANJAV BOSE APRIL-2026"      should be SANJAY BOSE
 "APRIL-2026"                  no name recovered at all
 ```
 
