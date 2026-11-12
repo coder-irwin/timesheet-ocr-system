@@ -1,0 +1,45 @@
+# Production overlay: adds Caddy (HTTPS + login) in front of the app and keeps
+# the app off the public interface. Used together with the base docker-compose.yml:
+#   docker compose -f docker-compose.yml -f gcp/docker-compose.prod.yml --env-file config.env --env-file .env up -d
+services:
+  timesheet:
+    ports: !reset []          # not exposed directly; Caddy is the only public door
+    expose:
+      - "8077"
+    volumes:
+      - ./data:/data
+      - ./overlay/index.html:/app/web/index.html:ro   # hot-fix layer (UI + wording); remove when the image carries it
+      - ./overlay/app/validate.py:/app/app/validate.py:ro
+      - ./overlay/app/rowconf.py:/app/app/rowconf.py:ro
+      - ./overlay/app/main.py:/app/app/main.py:ro
+      - ./overlay/app/db.py:/app/app/db.py:ro
+      - ./overlay/app/cloudcost.py:/app/app/cloudcost.py:ro
+      - ./overlay/app/export_designs.py:/app/app/export_designs.py:ro
+      - ./overlay/app/pipeline.py:/app/app/pipeline.py:ro
+      - ./overlay/app/generic_grid.py:/app/app/generic_grid.py:ro   # D-071 nearest day column
+      - ./overlay/app/ocr_engine.py:/app/app/ocr_engine.py:ro       # D-073 angle classifier off
+      - ./overlay/app/clocks.py:/app/app/clocks.py:ro               # D-072 (imported by pipeline)
+      - ./overlay/app/aarvi_form.py:/app/app/aarvi_form.py:ro   # D-082 name labels
+      - ./overlay/app/form_profiles.py:/app/app/form_profiles.py:ro
+      - ./overlay/cost.html:/app/web/cost.html:ro
+  caddy:
+    image: caddy:2
+    container_name: timesheet-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - SITE=${SITE}
+      - TEAM_HASH=${TEAM_HASH}
+      - CLIENT_HASH=${CLIENT_HASH}
+    volumes:
+      - ./gcp/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./gcp/users.caddy:/etc/caddy/users.caddy:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - timesheet
+volumes:
+  caddy_data:
+  caddy_config:

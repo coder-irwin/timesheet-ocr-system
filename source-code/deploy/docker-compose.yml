@@ -1,0 +1,54 @@
+# Timesheet Extraction & Validation -- service definition.
+#
+# You should not need to edit this file. All settings live in config.env.
+#
+# Start it with the provided scripts (start.sh / start.bat) rather than by
+# hand: they pass "--env-file config.env", which is what makes the port
+# setting in config.env take effect.
+
+services:
+  timesheet:
+    image: timesheet-app:2.0.0
+    container_name: timesheet-app
+
+    # Left side = port on the server, right side = port inside the container.
+    # The left side comes from TS_PORT in config.env.
+    ports:
+      - "${TS_PORT:-8077}:8077"
+
+    # All the settings from config.env are handed to the application.
+    env_file:
+      - config.env
+
+    # The "data" folder next to this file is the application's permanent
+    # storage: the employee roster, uploaded documents, the database and the
+    # Excel exports. It lives on the server, NOT inside the container, so
+    # nothing is lost when the application is upgraded or restarted.
+    volumes:
+      - ./data:/data
+
+    # Bring the application back automatically after a crash or a server
+    # reboot. This is what makes the deployment unattended.
+    restart: unless-stopped
+
+    # Only relevant if the optional AI fallback is switched on in config.env:
+    # this is what lets the container reach a service running on the server
+    # itself. Harmless when the fallback is off.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    # Docker will mark the container "unhealthy" if the application stops
+    # answering, which makes problems visible in "docker compose ps".
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8077/api/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 40s
+      retries: 3
+
+    # Keep log files from growing without limit and filling the server's disk.
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

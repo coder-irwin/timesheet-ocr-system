@@ -1,0 +1,38 @@
+# Timesheet Extraction & Validation -- dependency set
+#
+# Target: Python 3.11 or 3.12 on Windows (16 GB RAM, 512 GB disk, CPU only).
+# These are the exact versions verified working end-to-end. Everything here is
+# CPU-only: no CUDA, no GPU, no PaddlePaddle, no PyTorch.
+#
+# Total install footprint is roughly 700 MB, dominated by onnxruntime and the
+# OCR models (which download on first run to ~/.rapidocr, about 25 MB).
+
+# --- web app ---------------------------------------------------------------
+fastapi==0.141.1
+uvicorn[standard]==0.52.1
+python-multipart==0.0.32        # multipart form upload handling
+
+# --- OCR -------------------------------------------------------------------
+# RapidOCR ships PaddleOCR's PP-OCRv6 models converted to ONNX, so we get the
+# accuracy of PaddleOCR without installing the PaddlePaddle framework, which is
+# the usual source of Windows install failures.
+rapidocr==3.9.2
+onnxruntime==1.28.0
+
+# --- imaging / PDF ---------------------------------------------------------
+# NOTE: the code supports BOTH OpenCV 4.x and 5.x. They differ in the return
+# shape of HoughLinesP ((N,1,4) vs (N,4)); app/preprocess.py handles both.
+opencv-python-headless==5.0.0.93
+numpy==2.5.2
+pillow==12.3.0
+pypdfium2==5.12.1               # PDF -> image rasterisation, no external binary
+
+# --- data ------------------------------------------------------------------
+openpyxl==3.1.5                 # .xlsx export (and reading .xlsx ground truth)
+xlrd==2.0.2                     # legacy .xls reading (client sends these)
+RapidFuzz==3.14.5               # fuzzy matching for anchors + employee roster
+
+# --- optional --------------------------------------------------------------
+# Only needed if you enable VLM escalation for handwritten pages via a local
+# Ollama install. The system runs fully without it.
+httpx==0.28.1

@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timesheet Digitiser — AARVI ENCON</title>
+<style>
+  :root{
+    --bg:#f3f5f8; --card:#fff; --line:#e3e7ec; --text:#141a22; --muted:#66707e;
+    --brand:#2563eb; --brand-dark:#1d4fd7; --brandbg:#eaf1ff;
+    --ok:#15803d; --warn:#b45309; --bad:#b91c1c;
+    --okbg:#e9f7ee; --warnbg:#fff4e0; --badbg:#fde8e8;
+    --shadow:0 1px 2px rgba(16,22,34,.05),0 6px 18px rgba(16,22,34,.05);
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+       -webkit-font-smoothing:antialiased}
+  button,input,select{font:inherit}
+  a{color:var(--brand)}
+
+  /* ---------- chrome ---------- */
+  header{background:#fff;border-bottom:1px solid var(--line);padding:0 24px;height:60px;
+         display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:30}
+  .logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#1e40af);
+        color:#fff;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none;letter-spacing:.02em}
+  header h1{font-size:16px;margin:0;font-weight:650;letter-spacing:-.01em}
+  .tagline{color:var(--muted);font-size:12.5px}
+  .spacer{flex:1}
+  .chip{font-size:12px;padding:5px 11px;border-radius:99px;background:#eef1f5;color:var(--muted);
+        white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+  .chip.ok{background:var(--okbg);color:var(--ok)} .chip.bad{background:var(--badbg);color:var(--bad)}
+  .chip .dotlive{width:7px;height:7px;border-radius:99px;background:currentColor;box-shadow:0 0 0 3px rgba(21,128,61,.15)}
+
+  nav.steps{background:#fff;border-bottom:1px solid var(--line);padding:0 24px;display:flex;gap:2px;
+            position:sticky;top:60px;z-index:29;overflow-x:auto}
+  nav.steps button{background:none;border:0;padding:13px 16px;color:var(--muted);cursor:pointer;
+        font-size:14px;font-weight:550;border-bottom:2px solid transparent;white-space:nowrap;
+        display:inline-flex;align-items:center;gap:8px}
+  nav.steps button:hover{color:var(--text)}
+  nav.steps button.on{color:var(--brand);border-bottom-color:var(--brand)}
+  nav.steps button .n{width:20px;height:20px;border-radius:99px;background:#eef1f5;color:var(--muted);
+        font-size:11px;font-weight:700;display:grid;place-items:center}
+  nav.steps button.on .n{background:var(--brand);color:#fff}
+  nav.steps .badge{display:inline-block;min-width:18px;padding:0 6px;border-radius:99px;
+        background:#eef1f5;color:var(--muted);font-size:11px;font-weight:700;line-height:18px;text-align:center}
+  nav.steps button.on .badge{background:var(--brandbg);color:var(--brand)}
+  nav.steps .badge.bad{background:var(--badbg);color:var(--bad)}
+  nav.steps .sep{flex:1}
+
+  main{max-width:1600px;margin:0 auto;padding:22px 24px 80px}
+  .view{display:none} .view.on{display:block;animation:fade .18s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+  h2.sec{font-size:15.5px;margin:0 0 4px;font-weight:650}
+  p.sub{margin:0 0 14px;color:var(--muted);font-size:13.5px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:1000px){.grid2{grid-template-columns:1fr}}
+
+  /* ---------- buttons ---------- */
+  .btn{background:var(--brand);color:#fff;border:0;padding:10px 18px;border-radius:9px;cursor:pointer;
+       font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:8px;transition:.12s}
+  .btn:hover{background:var(--brand-dark)}
+  .btn.ghost{background:#fff;color:var(--text);border:1px solid var(--line);font-weight:500}
+  .btn.ghost:hover{background:#f6f8fb}
+  .btn.ok{background:var(--ok)} .btn.sm{padding:6px 12px;font-size:13px}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  select{padding:9px 12px;border-radius:9px;border:1px solid var(--line);background:#fff}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+  /* ---------- home ---------- */
+  .hero{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;align-items:stretch}
+  @media(max-width:1000px){.hero{grid-template-columns:1fr}}
+  .steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+  .steps3 div{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13px}
+  .steps3 b{display:block;font-size:13.5px;margin-bottom:2px}
+  .steps3 i{font-style:normal;display:inline-grid;place-items:center;width:22px;height:22px;border-radius:99px;
+            background:var(--brand);color:#fff;font-size:12px;font-weight:700;margin-bottom:6px}
+  table.list{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px}
+  table.list th{text-align:left;padding:8px 10px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--line)}
+  table.list td{padding:10px;border-bottom:1px solid #f0f2f5;vertical-align:middle}
+  table.list tr:hover td{background:#f8fafc}
+  .mini{display:inline-flex;gap:5px;align-items:center}
+  .mini span{min-width:22px;text-align:center;padding:1px 6px;border-radius:99px;font-size:11.5px;font-weight:600}
+  .mini .g{background:var(--okbg);color:var(--ok)} .mini .w{background:var(--warnbg);color:var(--warn)} .mini .b{background:var(--badbg);color:var(--bad)}
+
+  /* ---------- upload ---------- */
+  .drop{border:2px dashed #c9d1dc;border-radius:14px;padding:46px 20px;text-align:center;cursor:pointer;
+        background:#fbfcfe;transition:.15s}
+  .drop:hover,.drop.over{border-color:var(--brand);background:var(--brandbg)}
+  .drop .ico{width:52px;height:52px;border-radius:14px;background:var(--brandbg);color:var(--brand);
+             display:grid;place-items:center;margin:0 auto 10px;font-size:24px}
+  .drop .big{font-size:16px;font-weight:600;margin:6px 0 3px}
+  .drop .sub2{color:var(--muted);font-size:13px}
+
+  /* ---------- stats ---------- */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+  .stat .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+  .stat .v{font-size:28px;font-weight:700;line-height:1.2;margin-top:3px;font-variant-numeric:tabular-nums}
+  .stat.ok .v{color:var(--ok)} .stat.warn .v{color:var(--warn)} .stat.bad .v{color:var(--bad)}
+  .bar{height:8px;border-radius:99px;background:#e8ebf0;overflow:hidden}
+  .bar>i{display:block;height:100%;background:linear-gradient(90deg,#3b82f6,#2563eb);width:0;transition:width .4s}
+  .legend{font-size:12.5px;color:var(--muted);margin-top:11px} .legend b{color:var(--text)}
+  .lg{display:inline-flex;align-items:center;gap:6px;margin-right:14px}
+  .lg i{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+  /* ---------- review ---------- */
+  .review{display:grid;grid-template-columns:260px minmax(0,1fr) minmax(0,1.05fr);gap:14px;align-items:start}
+  @media(max-width:1200px){.review{grid-template-columns:1fr}}
+  .pane{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+  .pane>h3{margin:0;padding:11px 14px;border-bottom:1px solid var(--line);font-size:11.5px;text-transform:uppercase;
+           letter-spacing:.05em;color:var(--muted);font-weight:650;display:flex;align-items:center;gap:8px;background:#fafbfc}
+  .pane .body{max-height:76vh;overflow:auto;padding:14px}
+  .qfilter{display:flex;gap:4px;padding:8px 10px;border-bottom:1px solid var(--line);background:#fff}
+  .qfilter button{flex:1;border:1px solid var(--line);background:#fff;border-radius:7px;padding:4px 0;font-size:11.5px;
+                  color:var(--muted);cursor:pointer;font-weight:600}
+  .qfilter button.on{background:var(--brandbg);border-color:#bcd0ff;color:var(--brand)}
+  ul.pages{list-style:none;margin:0;padding:0;max-height:68vh;overflow:auto}
+  ul.pages li{display:flex;gap:9px;align-items:center;padding:9px 12px;border-bottom:1px solid #f1f3f6;cursor:pointer;font-size:13.5px}
+  ul.pages li:hover{background:#f7f9fc}
+  ul.pages li.sel{background:var(--brandbg);box-shadow:inset 3px 0 0 var(--brand)}
+  .dot{width:9px;height:9px;border-radius:99px;flex:none}
+  .dot.clean{background:var(--ok)} .dot.review_optional{background:var(--warn)}
+  .dot.needs_review,.dot.error{background:var(--bad)}
+  .dot.corrected{background:var(--brand)} .dot.pending,.dot.processing{background:#c6ccd4}
+  .grow{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .who{font-size:11px;color:var(--brand);background:var(--brandbg);padding:1px 7px;border-radius:99px;margin-left:6px}
+  .lockbar{background:#fff4e0;border:1px solid #f4d9a6;border-radius:9px;padding:9px 12px;font-size:13.5px;margin-bottom:10px;display:flex;gap:10px;align-items:center}
+  .readonly input{background:#f6f8fb;color:#66707e}
+  .tiny{font-size:12px;color:var(--muted)}
+  .imgwrap{position:relative;overflow:auto;max-height:76vh;background:#eceff3}
+  .imgwrap img{display:block;width:100%;transform-origin:top left;transition:transform .15s}
+  .zoombar{display:flex;gap:6px;margin-left:auto}
+  .zoombar button{border:1px solid var(--line);background:#fff;border-radius:6px;width:26px;height:24px;cursor:pointer;font-size:13px;line-height:1;padding:0}
+
+  .pagehead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .pagehead .name{font-size:17px;font-weight:650}
+  .pill{font-size:11.5px;padding:3px 9px;border-radius:99px;font-weight:600}
+  .pill.needs_review,.pill.error{background:var(--badbg);color:var(--bad)}
+  .pill.review_optional{background:var(--warnbg);color:var(--warn)}
+  .pill.clean,.pill.corrected{background:var(--okbg);color:var(--ok)}
+  .issues{display:grid;gap:6px;margin-bottom:12px}
+  .issue{padding:8px 11px;border-radius:9px;font-size:13.2px;background:var(--warnbg);border-left:3px solid var(--warn)}
+  .issue.block{background:var(--badbg);border-left-color:var(--bad)}
+  .issue.good{background:var(--okbg);border-left-color:var(--ok)}
+  details.more{margin-bottom:10px} details.more summary{cursor:pointer;font-size:13px;color:var(--muted)}
+  .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}
+  @media(max-width:1400px){.fields{grid-template-columns:1fr}}
+  .fields label{display:block;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+  .fields .f{display:flex;flex-direction:column}
+  input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:#fff}
+  input:focus{outline:2px solid #cfe0ff;border-color:var(--brand)}
+  input.bad{border-color:var(--bad);background:var(--badbg)}
+  input.changed{border-color:var(--brand);background:var(--brandbg)}
+  datalist{position:absolute}
+  .rcsum{display:flex;gap:14px;align-items:center;margin:14px 0 6px;font-size:12.5px;flex-wrap:wrap}
+  .rcsum b{font-weight:650}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{position:sticky;top:0;background:#fafbfc;text-align:left;padding:7px 6px;z-index:2;border-bottom:1px solid var(--line);
+     font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:650}
+  td{padding:2px 3px;border-bottom:1px solid #f2f4f7}
+  td input{padding:5px 7px;font-size:13px}
+  tr.flag td{background:#fff9ec} tr.blank td:first-child{opacity:.5}
+  td.rc{width:74px;text-align:center;font-variant-numeric:tabular-nums;font-size:12px;border-left:3px solid transparent;white-space:nowrap;cursor:help}
+  td.rc.ok{border-left-color:var(--ok)} td.rc.review{border-left-color:#B7791F} td.rc.must_fix{border-left-color:var(--bad)}
+  .rcb{display:inline-block;width:60px;padding:2px 0;border-radius:99px;font-weight:700;font-size:11.5px;line-height:1.5;text-align:center;color:#141a22}
+  td.rc .rcb.ok{background:#d9f0e2;color:#14532d} td.rc .rcb.review{background:#fcd98a;color:#5a3600} td.rc .rcb.must_fix{background:#f9c8c8;color:#7f1d1d}
+  tr.must_fix td{background:rgba(220,60,60,.06)}
+  .st-P{background:var(--okbg)} .st-W,.st-H{background:#eef1f5} .st-A{background:var(--badbg)} .st-L{background:#eef2ff} .st-C{background:#f3e8ff}
+  .rows-table{margin-bottom:70px}
+  .empty{text-align:center;color:var(--muted);padding:48px 20px;font-size:14px}
+  .spin{width:15px;height:15px;border:2px solid #d6dbe2;border-top-color:var(--brand);border-radius:99px;animation:sp .7s linear infinite;display:inline-block}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(8px);background:#141a22;color:#fff;
+         padding:11px 18px;border-radius:10px;font-size:14px;opacity:0;transition:.22s;pointer-events:none;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  kbd{background:#eef1f5;border:1px solid #dde2e8;border-bottom-width:2px;border-radius:4px;padding:1px 5px;font:600 11px ui-monospace,monospace;color:var(--muted)}
+  .stickysave{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 14px;margin:12px -14px -14px;
+              display:flex;gap:10px;align-items:center;box-shadow:0 -6px 12px rgba(0,0,0,.04)}
+
+  /* ---------- data ---------- */
+  .where{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+  .where div{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13px}
+  .where b{display:block;font-family:ui-monospace,monospace;font-size:12.5px;margin-bottom:3px;color:var(--brand)}
+  .tabs{display:flex;gap:6px;margin:16px 0 10px}
+  .tabs button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;font-size:13px;color:var(--muted);cursor:pointer}
+  .tabs button.on{color:var(--brand);border-color:#bcd0ff;background:var(--brandbg);font-weight:600}
+  .searchbar{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+  .searchbar input{max-width:320px}
+  .wrap{overflow:auto;max-height:60vh;border:1px solid var(--line);border-radius:10px}
+  .wrap table{font-size:13px} .wrap th{background:#fafbfc}
+  .st-OK{color:var(--ok);font-weight:600} .st-REVIEW{color:var(--warn);font-weight:600} .st-HOLD{color:var(--bad);font-weight:600}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">TS</div>
+  <div>
+    <h1>Timesheet Digitiser</h1>
+    <div class="tagline" id="tagline">Paper timesheets → checked Excel</div>
+  </div>
+  <div class="spacer"></div>
+  <span class="chip" id="chipUser" hidden></span>
+  <span class="chip" id="chipEngine">checking…</span>
+  <span class="chip" id="chipRoster"></span>
+  <span class="chip ok" id="chipMode"><span class="dotlive"></span>Offline</span>
+</header>
+
+<nav class="steps">
+  <button data-v="home" class="on">Home</button>
+  <button data-v="upload"><span class="n">1</span>Upload</button>
+  <button data-v="progress"><span class="n">2</span>Reading<span class="badge" id="bProg">0</span></button>
+  <button data-v="review"><span class="n">3</span>Check<span class="badge" id="bRev">0</span></button>
+  <button data-v="export"><span class="n">4</span>Download</button>
+  <span class="sep"></span>
+  <button data-v="data">Records</button>
+</nav>
+
+<main>
+  <!-- ============ HOME ============ -->
+  <section class="view on" id="v-home">
+    <div class="hero">
+      <div class="card">
+        <h2 class="sec">Turn a month of paper timesheets into checked Excel</h2>
+        <p class="sub">Upload the scans or photos. Every page is read, the totals are checked against the day rows,
+           and anything that does not add up is held for a person to confirm. Nothing goes to payroll unchecked.</p>
+        <div class="steps3">
+          <div><i>1</i><b>Upload</b>PDF scans or phone photos. A whole month at once is fine.</div>
+          <div><i>2</i><b>Check what is flagged</b>Green is fine, amber is worth a glance, red needs fixing.</div>
+          <div><i>3</i><b>Download</b>Excel sheets for payroll, attendance, invoicing and records.</div>
+        </div>
+        <div class="row" style="margin-top:16px">
+          <button class="btn" onclick="show('upload')">Upload timesheets →</button>
+          <button class="btn ghost" onclick="show('data')">See stored records</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="sec">How accurate it is</h2>
+        <p class="sub">Checked by hand on 50 randomly chosen real timesheets.</p>
+        <div class="stats" style="grid-template-columns:1fr 1fr">
+          <div class="stat ok"><div class="k">Days read correctly</div><div class="v">95.9%</div></div>
+          <div class="stat ok"><div class="k">Pages with a problem that get flagged</div><div class="v">100%</div></div>
+          <div class="stat"><div class="k">Rows wrong without a flag</div><div class="v">0.9%</div></div>
+          <div class="stat"><div class="k">Pages processed to date</div><div class="v" id="homePages">—</div></div>
+        </div>
+        <div class="legend">Checked by hand against the paper on 50 randomly chosen pages. Every page containing a mistake was marked for review; about 1 row in 100 can be wrong without a mark, which is why the checking step matters.</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="row" style="justify-content:space-between">
+        <div><h2 class="sec">Recent batches</h2><p class="sub" style="margin:0">Open a batch to keep checking it or to download its Excel.</p></div>
+      </div>
+      <table class="list" id="batchList"><tbody><tr><td class="tiny">No batches yet.</td></tr></tbody></table>
+    </div>
+  </section>
+
+  <!-- ============ 1 UPLOAD ============ -->
+  <section class="view" id="v-upload">
+    <div class="card">
+      <h2 class="sec">Upload your timesheets</h2>
+      <p class="sub">Scanned PDFs or phone photos. You can drop a whole month at once;
+         each page is read on its own.</p>
+      <div class="drop" id="drop">
+        <div class="ico">📄</div>
+        <div class="big">Drop files here, or click to choose</div>
+        <div class="sub2">PDF · JPG · PNG · TIFF</div>
+      </div>
+      <input type="file" id="file" multiple hidden accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff">
+      <div class="legend" style="margin-top:14px">
+        If you upload the same page twice, it is recognised and not read again.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2 PROGRESS ============ -->
+  <section class="view" id="v-progress">
+    <div class="card" style="margin-bottom:14px">
+      <div class="row" style="justify-content:space-between">
+        <div><h2 class="sec">Reading your pages</h2>
+             <p class="sub" id="procHint" style="margin:0">nothing uploaded yet</p></div>
+        <div id="procSpin"></div>
+      </div>
+      <div class="bar" style="margin-top:14px"><i id="bar"></i></div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="legend" style="margin:0">
+        <span class="lg"><i style="background:var(--ok)"></i><b>All good</b> everything adds up, nothing to do</span>
+        <span class="lg"><i style="background:var(--warn)"></i><b>Worth a look</b> a small warning</span>
+        <span class="lg"><i style="background:var(--bad)"></i><b>Must fix</b> a total does not match the days, or the sheet's total box was left blank</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="row" style="justify-content:space-between">
+        <div><h2 class="sec">What is happening</h2>
+             <p class="sub" style="margin:0">newest at the bottom</p></div>
+        <label class="tiny" style="cursor:pointer">
+          <input type="checkbox" id="logDetail" style="width:auto;vertical-align:-1px">
+          show technical detail</label>
+      </div>
+      <div id="logBox" style="margin-top:12px;max-height:280px;overflow:auto;
+           background:#fbfcfd;border:1px solid var(--line);border-radius:9px;padding:10px">
+        <div class="tiny">Waiting for the first page…</div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============ 3 REVIEW ============ -->
+  <section class="view" id="v-review">
+    <div class="review">
+      <div class="pane">
+        <h3>Pages <span class="tiny" id="qCount" style="margin-left:auto"></span></h3>
+        <div class="qfilter" id="qfilter">
+          <button data-f="all" class="on">All</button><button data-f="needs_review">To fix</button>
+          <button data-f="review_optional">To glance</button><button data-f="ok">Done</button>
+        </div>
+        <ul class="pages" id="queue"><li class="tiny" style="padding:14px">Nothing yet.</li></ul>
+      </div>
+
+      <div class="pane">
+        <h3>Original scan
+          <span class="zoombar">
+            <button id="zOut" title="Zoom out">−</button>
+            <button id="zIn"  title="Zoom in">+</button>
+            <button id="zFit" title="Fit width">⤢</button>
+          </span>
+        </h3>
+        <div class="imgwrap" id="imgPane"><div class="empty">Pick a page on the left</div></div>
+      </div>
+
+      <div class="pane">
+        <h3>What was read
+          <span class="tiny" id="navHint" style="margin-left:auto">
+            <kbd>J</kbd>/<kbd>K</kbd> page · <kbd>⌘S</kbd> save</span></h3>
+        <div class="body" id="dataPane"><div class="empty">Pick a page on the left</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4 EXPORT ============ -->
+  <section class="view" id="v-export">
+    <div class="card">
+      <h2 class="sec">Download as Excel</h2>
+      <p class="sub">One Excel file with six sheets. The <b>Payroll_Import</b> sheet has one line per employee per month with a status:
+         <b>OK</b> means use it, <b>REVIEW</b> means there was a small warning, <b>HOLD</b> means someone should check it first.
+         The other sheets are the attendance grid, invoice, full detail, change history and a summary.</p>
+      <div class="row">
+        <select id="design"></select>
+        <button class="btn" id="exportBtn" disabled>Download</button>
+        <span class="tiny" id="exportHint">upload something first</span>
+      </div>
+      <div id="exportSummary" class="legend"></div>
+    </div>
+  </section>
+
+  <!-- ============ DATA & AUDIT ============ -->
+  <section class="view" id="v-data">
+    <div class="card">
+      <h2 class="sec">Where your records are kept</h2>
+      <p class="sub">Everything is kept in one folder on this server and backed up every night. Nothing is stored anywhere else.</p>
+      <div class="where">
+        <div><b>timesheets.db</b>The main record book: what was read from every page, any corrections made, whether it has been checked, and the history of changes.</div>
+        <div><b>uploads</b>The PDFs and photos exactly as they were uploaded.</div>
+        <div><b>pages</b>One cleaned-up image of each page, as shown on the checking screen.</div>
+        <div><b>exports</b>Every Excel file that has been downloaded.</div>
+        <div><b>roster.csv</b>The employee list used to recognise names and codes.</div>
+        <div><b>cache</b>Remembers pages already read, so uploading them again is instant.</div>
+      </div>
+      <div class="legend">Your payroll team can take the <b>Payroll_Import</b> sheet from any download. If another system needs to connect directly, it can read the record book or use the same connection this screen uses.</div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="tabs"><button class="on" data-t="payroll">Monthly totals for payroll</button><button data-t="audit">Change history</button><button data-t="roster">Employee list</button></div>
+      <div id="t-payroll">
+        <div class="searchbar"><input id="pSearch" placeholder="search name, code or period…"><span class="tiny" id="pCount"></span>
+          <span class="spacer"></span><span class="tiny"><span class="st-OK">OK</span> ready to use · <span class="st-REVIEW">REVIEW</span> small warning · <span class="st-HOLD">HOLD</span> check before using</span></div>
+        <div class="wrap"><table id="pTable"><thead><tr><th>Batch</th><th>Code</th><th>Name</th><th>Period</th><th>P</th><th>A</th><th>L</th><th>W/O</th><th>PH</th><th>C/O</th><th>Hours</th><th>OT</th><th>Status</th><th></th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div id="t-audit" hidden>
+        <p class="sub">Every change anyone has made: what it was, what it became, and when.</p>
+        <div class="wrap"><table id="aTable"><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Page</th><th>Field</th><th>From</th><th>To</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div id="t-roster" hidden>
+        <p class="sub">The list of employees used to recognise names and codes. To add or change people, upload a new list (a CSV file with the same columns: name, code, site, designation). The whole list is replaced.</p>
+        <div class="row"><input type="file" id="rosterFile" accept=".csv" style="width:auto"><button class="btn sm" id="rosterBtn">Upload employee list</button><span class="tiny" id="rosterMsg"></span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+let BATCH=null, PAGES=[], CUR=null, POLL=null, ZOOM=1, DIRTY=false, ME='local', LOCKED_BY=null, HB=null;
+const MANUAL_SECONDS_PER_PAGE = 240;      // ~4 min to type one sheet by hand
+
+const toast = (m,ms=2400)=>{const t=$('#toast');t.textContent=m;t.classList.add('show');
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),ms);};
+const esc = v => String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+
+/* ---------------- navigation ---------------- */
+function show(v){
+  $$('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v));
+  $$('nav.steps button').forEach(b=>b.classList.toggle('on', b.dataset.v===v));
+  if(v==='review' && CUR==null){ if(PAGES.length) openPage(sortedPages()[0].id); else refresh().then(()=>{ if(PAGES.length&&CUR==null) openPage(sortedPages()[0].id); }); }
+  if(v==='home') drawBatches();
+  if(v==='data') loadData();
+}
+/* ---------------- home: recent batches ---------------- */
+async function drawBatches(){
+  let bs=[]; try{ bs=await (await fetch('/api/batches')).json(); }catch(e){}
+  $('#homePages').textContent=bs.reduce((a,b)=>a+(b.pages||0),0).toLocaleString();
+  const tb=$('#batchList tbody');
+  if(!bs.length){ tb.innerHTML='<tr><td class="tiny">No batches yet — upload your first month above.</td></tr>'; return; }
+  tb.innerHTML='<tr><th>Batch</th><th>Uploaded</th><th>Pages</th><th>Status</th><th></th></tr>'+bs.slice(0,25).map(b=>{
+    const ok=(b.clean||0)+(b.corrected||0), w=b.review_optional||0, bad=(b.needs_review||0)+(b.errored||0), pend=b.pending||0;
+    return `<tr>
+      <td><b>${esc(b.name)}</b></td>
+      <td class="tiny">${new Date(b.created_at*1000).toLocaleString()}</td>
+      <td>${b.pages}</td>
+      <td><span class="mini"><span class="g" title="clean">${ok}</span><span class="w" title="needs a look">${w}</span><span class="b" title="must fix">${bad}</span>${pend?`<span title="still reading">${pend} pending</span>`:''}</span></td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn ghost sm" onclick="useBatch(${b.id},'review')">Review</button>
+        <button class="btn ghost sm" onclick="useBatch(${b.id},'export')">Download</button></td></tr>`}).join('');
+}
+function useBatch(id,view){ BATCH=id; CUR=null; $('#exportBtn').disabled=false; $('#exportHint').textContent=''; poll(); show(view); }
+/* ---------------- data & audit ---------------- */
+let QFILTER='all', PAYROWS=[];
+$$('#qfilter button').forEach(b=>b.onclick=()=>{QFILTER=b.dataset.f;$$('#qfilter button').forEach(x=>x.classList.toggle('on',x===b));drawQueue();});
+$$('.tabs button').forEach(b=>b.onclick=()=>{$$('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  ['payroll','audit','roster'].forEach(t=>$('#t-'+t).hidden=(t!==b.dataset.t));});
+async function loadData(){
+  let bs=[]; try{ bs=await (await fetch('/api/batches')).json(); }catch(e){}
+  const rows=[];
+  for(const b of bs.slice(0,40)){
+    let ps=[]; try{ ps=await (await fetch(`/api/batches/${b.id}/pages`)).json(); }catch(e){ continue; }
+    for(const p of ps){
+      if(p.status==='pending'||p.status==='processing') continue;
+      let d; try{ d=await (await fetch(`/api/pages/${p.id}?claim=0`)).json(); }catch(e){ continue; }
+      const r=d.record||{}, sm=r.summary||{}, iss=d.issues||[];
+      const st=iss.some(i=>i.severity==='block')?'HOLD':(iss.length?'REVIEW':'OK');
+      rows.push({batch:b.name,pid:p.id,code:r.employee_code,name:r.employee_name,period:r.period_label,
+        P:sm.total_present_days,A:sm.total_absent_days,L:sm.total_leave_days,W:sm.total_weekly_off,H:sm.total_public_holiday,C:sm.total_comp_off,
+        hrs:sm.total_man_hours,ot:sm.total_ot_hours,status:st});
+    }
+  }
+  PAYROWS=rows; drawPayroll();
+  let au=[]; try{ au=await (await fetch('/api/audit?limit=300')).json(); }catch(e){}
+  $('#aTable tbody').innerHTML=au.length?au.map(a=>`<tr><td class="tiny">${new Date(a.ts*1000).toLocaleString()}</td><td>${esc(a.actor)}</td><td>${esc(a.action)}</td>
+     <td class="tiny">${esc(a.source_name||'')}</td><td>${esc(a.field||'')}</td><td class="tiny">${esc(a.old_value||'')}</td><td>${esc(a.new_value||'')}</td></tr>`).join('')
+     :'<tr><td class="tiny" colspan="7">No changes recorded yet.</td></tr>';
+}
+function drawPayroll(){
+  const q=($('#pSearch').value||'').toLowerCase();
+  const rows=PAYROWS.filter(r=>!q||[r.code,r.name,r.period,r.batch].some(v=>String(v||'').toLowerCase().includes(q)));
+  $('#pCount').textContent=`${rows.length} row(s) · OK ${rows.filter(r=>r.status==='OK').length} · REVIEW ${rows.filter(r=>r.status==='REVIEW').length} · HOLD ${rows.filter(r=>r.status==='HOLD').length}`;
+  $('#pTable tbody').innerHTML=rows.length?rows.map(r=>`<tr><td class="tiny">${esc(r.batch)}</td><td>${esc(r.code)}</td><td>${esc(r.name)}</td><td>${esc(r.period)}</td>
+     <td>${esc(r.P)}</td><td>${esc(r.A)}</td><td>${esc(r.L)}</td><td>${esc(r.W)}</td><td>${esc(r.H)}</td><td>${esc(r.C)}</td><td>${esc(r.hrs)}</td><td>${esc(r.ot)}</td>
+     <td class="st-${r.status}">${r.status}</td><td><button class="btn ghost sm" onclick="openPage(${r.pid})">open</button></td></tr>`).join('')
+     :'<tr><td class="tiny" colspan="14">Nothing processed yet.</td></tr>';
+}
+$('#pSearch').oninput=drawPayroll;
+$('#rosterBtn').onclick=async()=>{
+  const f=$('#rosterFile').files[0]; if(!f){ toast('Choose a file first'); return; }
+  const fd=new FormData(); fd.append('file',f);
+  const r=await fetch('/api/roster',{method:'POST',body:fd});
+  const j=await r.json().catch(()=>({}));
+  $('#rosterMsg').textContent=r.ok?`Employee list updated — ${j.rows} people`:'Upload failed'; health();
+};
+$$('nav.steps button').forEach(b=>b.onclick=()=>show(b.dataset.v));
+
+/* ---------------- health ---------------- */
+async function health(){
+  try{
+    const h=await (await fetch('/api/health')).json();
+    // Where are we? On a laptop the app is offline and private to that machine;
+    // on a server it is a private, encrypted site behind a login.
+    const local=['localhost','127.0.0.1','::1'].includes(location.hostname);
+    const secure=location.protocol==='https:';
+    $('#chipMode').innerHTML='<span class="dotlive"></span>'+(local?'Offline':(secure?'Secure':'Private'));
+    $('#tagline').textContent='Paper timesheets → checked Excel · '+(local?'nothing leaves this computer':'private and password-protected');
+    try{ const me=await (await fetch('/api/me')).json(); ME=me.user||'local'; if(ME!=='local'){ const u=$('#chipUser'); u.hidden=false; u.textContent='Signed in as '+ME; } }catch(e){}
+    const e=$('#chipEngine');
+    e.textContent = h.ocr_ready ? 'Ready' : 'Reader not available';
+    e.className='chip '+(h.ocr_ready?'ok':'bad');
+    const r=$('#chipRoster');
+    r.textContent = h.roster_loaded ? `${h.roster_size.toLocaleString()} employees on file`
+                                    : 'no employee list';
+    r.className='chip '+(h.roster_loaded?'ok':'');
+  }catch(e){
+    $('#chipEngine').textContent='Backend not running';
+    $('#chipEngine').className='chip bad';
+  }
+}
+
+/* ---------------- upload ---------------- */
+$('#drop').onclick=()=>$('#file').click();
+$('#drop').ondragover=e=>{e.preventDefault();$('#drop').classList.add('over')};
+$('#drop').ondragleave=()=>$('#drop').classList.remove('over');
+$('#drop').ondrop=e=>{e.preventDefault();$('#drop').classList.remove('over');
+                      upload(e.dataTransfer.files)};
+$('#file').onchange=e=>upload(e.target.files);
+
+async function upload(files){
+  if(!files||!files.length) return;
+  const fd=new FormData();
+  fd.append('name',`Batch ${new Date().toLocaleString()}`);
+  for(const f of files) fd.append('files',f);
+  show('progress');
+  $('#procHint').textContent=`uploading ${files.length} file(s)…`;
+  $('#procSpin').innerHTML='<span class="spin"></span>';
+  let j;
+  try{
+    const r=await fetch('/api/batches',{method:'POST',body:fd});
+    if(!r.ok) throw new Error(await r.text());
+    j=await r.json();
+  }catch(err){ toast('Upload failed — '+String(err).slice(0,60),5000);
+               $('#procSpin').innerHTML=''; return; }
+  BATCH=j.batch_id; CUR=null;
+  $('#exportBtn').disabled=false; $('#exportHint').textContent='';
+  if(j.skipped?.length) toast(`${j.skipped.length} file(s) skipped`,4000);
+  toast(`${j.pages} page(s) queued`);
+  poll();
+}
+
+function poll(){ if(POLL)clearInterval(POLL); refresh(); POLL=setInterval(refresh,1500); }
+
+async function refresh(){
+  if(BATCH==null) return;
+  try{ PAGES=await (await fetch(`/api/batches/${BATCH}/pages`)).json(); }catch(e){ return; }
+  const done=PAGES.filter(p=>p.status!=='pending'&&p.status!=='processing').length;
+  $('#bar').style.width=(PAGES.length?Math.round(done/PAGES.length*100):0)+'%';
+  const finished = done===PAGES.length;
+  $('#procHint').textContent = finished
+      ? `Done — ${PAGES.length} page(s) read`
+      : `reading page ${done+1} of ${PAGES.length}…`;
+  $('#procSpin').innerHTML = finished ? '' : '<span class="spin"></span>';
+  $('#bProg').textContent = PAGES.length;
+  drawStats(done); drawQueue();
+  if(finished && POLL){ clearInterval(POLL); POLL=null;
+    const need=PAGES.filter(p=>p.block_count>0).length;
+    toast(need? `${need} page(s) need a look` : 'All pages add up');
+  }
+}
+
+function drawStats(done){
+  const c=k=>PAGES.filter(p=>p.status===k).length;
+  const clean=c('clean')+c('corrected'), warn=c('review_optional'),
+        bad=c('needs_review')+c('error');
+  const fields=PAGES.reduce((a,p)=>a+(p.field_count||0),0);
+  const cached=PAGES.filter(p=>p.from_cache).length;
+  const ms=PAGES.reduce((a,p)=>a+(p.extract_ms||0),0);
+  const tiles=[
+    ['Pages scanned',PAGES.length,''],
+    ['All good',clean,'ok'],
+    ['Worth a look',warn,'warn'],
+    ['Must fix',bad,'bad'],
+    ['Boxes read',fields.toLocaleString(),''],
+    ['Typing time saved',Math.round(done*MANUAL_SECONDS_PER_PAGE/60)+' min',''],
+    ['Time per page',done?(ms/done/1000).toFixed(1)+' sec':'—',''],
+    ['Already read before',cached,''],
+  ];
+  $('#stats').innerHTML=tiles.map(([k,v,cls])=>
+    `<div class="stat ${cls}"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+  $('#bRev').textContent=bad+warn;
+  $('#bRev').className='badge'+(bad?' bad':'');
+}
+
+const ORDER={needs_review:0,error:1,review_optional:2,corrected:3,clean:4,processing:8,pending:9};
+const sortedPages=()=>[...PAGES].sort((a,b)=>
+  (ORDER[a.status]??9)-(ORDER[b.status]??9)||a.id-b.id);
+
+function drawQueue(){
+  const all=sortedPages();
+  const s=all.filter(p=>QFILTER==='all'||(QFILTER==='ok'?['clean','corrected'].includes(p.status):p.status===QFILTER));
+  $('#qCount').textContent=`${s.length}${QFILTER==='all'?'':' of '+all.length}`;
+  $('#queue').innerHTML = s.length ? s.map(p=>`
+    <li data-id="${p.id}" class="${CUR===p.id?'sel':''}">
+      <span class="dot ${p.status}"></span>
+      <span class="grow" title="${esc(p.source_name)}">${esc(p.employee_name||p.source_name)}${p.checking_by&&p.checking_by!==ME?` <span class="who">👤 ${esc(p.checking_by)}</span>`:''}</span>
+      <span class="tiny">${p.status==='pending'||p.status==='processing'?'reading…':p.block_count?p.block_count+' to fix'
+                          :(p.issue_count?p.issue_count+' to glance':'good')}</span>
+    </li>`).join('') : '<li class="tiny" style="padding:14px">'+(QFILTER==='all'?'Nothing yet.':'No pages in this filter.')+'</li>';
+  $$('#queue li[data-id]').forEach(li=>li.onclick=()=>openPage(+li.dataset.id));
+}
+
+/* ---------------- review ---------------- */
+function releaseLock(){ if(CUR!=null && !LOCKED_BY){ navigator.sendBeacon?fetch(`/api/pages/${CUR}/lock`,{method:'DELETE',keepalive:true}):0; } if(HB){clearInterval(HB);HB=null;} }
+async function openPage(id){
+  if(DIRTY && !confirm('You have unsaved edits on this page. Discard them?')) return;
+  releaseLock();
+  CUR=id; DIRTY=false; drawQueue(); show('review');
+  $('#dataPane').innerHTML='<div class="empty"><span class="spin"></span></div>';
+  const p=await (await fetch(`/api/pages/${id}`)).json();
+  const lk=p.lock||{ok:true}; LOCKED_BY=(lk.ok===false)?lk.held_by:null;
+  if(!LOCKED_BY){ HB=setInterval(()=>fetch(`/api/pages/${id}/lock`,{method:'POST'}).catch(()=>{}),60000); }
+  ZOOM=1;
+  $('#imgPane').innerHTML=`<img id="scan" src="/api/pages/${id}/image" alt="scanned page">`;
+
+  const rec=p.record||{}, sum=rec.summary||{}, iss=p.issues||[];
+  const badF=new Set(iss.filter(i=>i.severity==='block')
+                        .map(i=>String(i.field||'').split('.').pop()));
+  const badDay=new Set(iss.map(i=>i.day).filter(d=>d!=null));
+  // Roster candidates, offered as autocomplete on the name field. The employee
+  // list is the strongest correction signal we have, so it is put directly in
+  // the reviewer's hands rather than only applied silently upstream.
+  const sugg=(p.roster_suggestions||[]).map(s=>
+    `<option value="${esc(s.employee_name)}">${esc(s.employee_code)} · ${s.score}% match</option>`
+  ).join('');
+
+  const F=(k,l,v,list='')=>`<label>${l}</label>`+
+    `<input data-f="${k}" ${list?`list="${list}"`:''} class="${badF.has(k)?'bad':''}"`+
+    ` value="${esc(v)}">`;
+
+  const rows=(rec.days||[]).map(d=>{
+    const st=(d.status||'').toUpperCase();
+    const blank=!d.in_time&&!d.out_time&&!d.normal_hours&&!st;
+    const rc=d._review||'', rcv=(d._row_conf==null?'':Math.round(d._row_conf*100)+'%');
+    const rcTxt=rc==='must_fix'?'✖ '+(rcv||'fix'):rc==='review'?'? '+(rcv||'look'):rc==='ok'?'✔ '+(rcv||'ok'):'—';
+    const why=(d._review_why||[]).join('\n');
+    return `<tr class="${badDay.has(d.day)?'flag':''}${blank?' blank':''}${rc==='must_fix'?' must_fix':''}">
+      <td class="rc ${rc}" title="${esc(why||'read clearly, nothing to check')}"><span class="rcb ${rc}">${rcTxt}</span></td>
+      <td style="width:34px"><input data-d="${d.day}" data-k="day" value="${esc(d.day)}"></td>
+      <td style="width:52px"><input data-d="${d.day}" data-k="status"
+          class="st-${st}" value="${esc(d.status)}"></td>
+      <td><input data-d="${d.day}" data-k="in_time" value="${esc(d.in_time)}"></td>
+      <td><input data-d="${d.day}" data-k="out_time" value="${esc(d.out_time)}"></td>
+      <td><input data-d="${d.day}" data-k="normal_hours" value="${esc(d.normal_hours)}"></td>
+      <td><input data-d="${d.day}" data-k="ot_hours" value="${esc(d.ot_hours)}"></td>
+      <td><input data-d="${d.day}" data-k="remarks" value="${esc(d.remarks)}"></td></tr>`;
+  }).join('');
+
+  const blocks=iss.filter(i=>i.severity==='block'), warns=iss.filter(i=>i.severity!=='block');
+  const pill={needs_review:'Needs fixing',review_optional:'Worth a look',clean:'All good',corrected:'Corrected',error:'Could not read'}[p.status]||p.status;
+  const FF=(k,l,v,list='')=>`<div class="f"><label>${l}</label>${F(k,'',v,list).replace('<label></label>','')}</div>`;
+  $('#dataPane').innerHTML=`
+    ${LOCKED_BY?`<div class="lockbar">👤 <b>${esc(LOCKED_BY)}</b> is checking this page right now. You can look, but changes are switched off until they finish.
+      <button class="btn ghost sm" style="margin-left:auto" onclick="openPage(${id})">Try again</button></div>`:''}
+    <div class="pagehead">
+      <span class="name">${esc(rec.employee_name||'Name not read')}</span>
+      <span class="pill ${p.status}">${pill}</span>
+      <span class="tiny">${esc(rec.employee_code||'')}${rec.employee_code&&rec.period_label?' · ':''}${esc(rec.period_label||'')}</span>
+      <span class="tiny" style="margin-left:auto">${esc(p.source_name)}</span>
+    </div>
+    <div class="issues">
+    ${blocks.length ? blocks.map(i=>`<div class="issue block">${esc(i.message)}</div>`).join('')
+      : (iss.length?'':'<div class="issue good">Everything on this page adds up.</div>')}
+    </div>
+    ${warns.length?`<details class="more"${blocks.length?'':' open'}><summary>${warns.length} small warning(s) — the page can still be downloaded</summary>
+      <div class="issues" style="margin-top:6px">${warns.map(i=>`<div class="issue">${esc(i.message)}</div>`).join('')}</div></details>`:''}
+
+    <datalist id="rosterNames">${sugg}</datalist>
+    <div class="fields">
+      ${FF('employee_name','Name',rec.employee_name,'rosterNames')}
+      ${FF('employee_code','Code',rec.employee_code)}
+      ${FF('designation','Designation',rec.designation)}
+      ${FF('period_label','Period',rec.period_label)}
+      ${FF('total_present_days','Present days (written on the sheet)',sum.total_present_days)}
+      ${FF('total_man_hours','Total hours (written on the sheet)',sum.total_man_hours)}
+      ${FF('total_ot_hours','Overtime hours (written on the sheet)',sum.total_ot_hours)}
+      ${FF('total_weekly_off','Weekly offs (written on the sheet)',sum.total_weekly_off)}
+    </div>
+
+    ${rec._row_summary?`<div class="rcsum">
+      <span>rows: <b style="color:var(--ok)">${rec._row_summary.ok} ok</b></span>
+      <span><b style="color:#B7791F">${rec._row_summary.review} review</b></span>
+      <span><b style="color:var(--bad)">${rec._row_summary.must_fix} must fix</b></span>
+      <span class="tiny">✔ read clearly · ? worth a glance · ✖ fix before downloading — hover over a badge to see why</span></div>`:''}
+    <table class="rows-table"><thead><tr><th title="how sure the reader is">Sure?</th><th>Day</th><th>Status</th><th>In</th><th>Out</th>
+      <th>Hours</th><th>Overtime</th><th>Remarks</th></tr></thead>
+      <tbody>${rows||'<tr><td colspan="8" class="tiny" style="padding:14px">'+
+        'No day rows were read from this page.</td></tr>'}</tbody></table>
+
+    <div class="stickysave">
+      <button class="btn" id="save">Save and check again</button>
+      <button class="btn ghost sm" id="reex">Read the page again</button>
+      <button class="btn ghost sm" id="next">Next page →</button>
+      <span class="tiny" id="saveMsg"></span>
+    </div>`;
+
+  if(LOCKED_BY){ $('#dataPane').classList.add('readonly'); $$('#dataPane input').forEach(i=>i.readOnly=true); $('#save').disabled=true; $('#reex').disabled=true; }
+  else $('#dataPane').classList.remove('readonly');
+  $$('#dataPane input').forEach(i=>i.oninput=()=>{
+    DIRTY=true; i.classList.add('changed');
+    if(i.dataset.k==='status') i.className='changed st-'+i.value.toUpperCase();
+  });
+  $('#save').onclick=()=>save(id,rec);
+  $('#next').onclick=()=>nextPage(1);
+  $('#reex').onclick=async()=>{
+    await fetch(`/api/pages/${id}/reextract`,{method:'POST'});
+    toast('Re-reading this page…'); DIRTY=false; poll();
+  };
+}
+
+function nextPage(step){
+  const s=sortedPages(); if(!s.length) return;
+  const i=s.findIndex(p=>p.id===CUR);
+  openPage(s[Math.max(0,Math.min(s.length-1,(i<0?0:i)+step))].id);
+}
+
+async function save(id,rec){
+  const out=JSON.parse(JSON.stringify(rec)); out.summary=out.summary||{};
+  $$('[data-f]').forEach(i=>{
+    const k=i.dataset.f, v=i.value.trim()||null;
+    if(k.startsWith('total_')) out.summary[k]=v; else out[k]=v;});
+  const byDay={};
+  $$('[data-d]').forEach(i=>{
+    (byDay[i.dataset.d]=byDay[i.dataset.d]||{})[i.dataset.k]=i.value.trim()||null;});
+  out.days=(out.days||[]).map(d=>({...d,...(byDay[String(d.day)]||{}),
+                                   day:Number(byDay[String(d.day)]?.day ?? d.day)}));
+  const r=await fetch(`/api/pages/${id}`,{method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({record:out})});
+  if(r.status===409){ let m='Someone else is checking this page.'; try{ m=(await r.json()).detail||m; }catch(e){} toast(m,6000); return; }
+  if(!r.ok){ toast('Save failed'); return; }
+  const j=await r.json();
+  DIRTY=false;
+  const left=j.issues.filter(i=>i.severity==='block').length;
+  toast(left? `Saved — ${left} thing(s) still to fix` : 'Saved — this page now adds up');
+  $('#saveMsg').textContent=`${j.changed} field(s) changed`;
+  await refresh(); await openPage(id);
+}
+
+/* zoom */
+const setZoom=z=>{ZOOM=Math.max(1,Math.min(4,z));
+  const im=$('#scan'); if(im) im.style.transform=`scale(${ZOOM})`;};
+$('#zIn').onclick =()=>setZoom(ZOOM+.25);
+$('#zOut').onclick=()=>setZoom(ZOOM-.25);
+$('#zFit').onclick=()=>setZoom(1);
+
+/* keyboard */
+document.addEventListener('keydown',e=>{
+  const typing=/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName);
+  if((e.metaKey||e.ctrlKey)&&e.key==='s'){e.preventDefault();$('#save')?.click();return;}
+  if(typing) return;
+  if(e.key==='j') nextPage(1);
+  if(e.key==='k') nextPage(-1);
+});
+window.onbeforeunload=e=>{ if(DIRTY){e.preventDefault();return e.returnValue='';} };
+window.addEventListener('pagehide',()=>{ if(CUR!=null&&!LOCKED_BY) navigator.sendBeacon&&fetch(`/api/pages/${CUR}/lock`,{method:'DELETE',keepalive:true}); });
+
+/* ---------------- export ---------------- */
+$('#exportBtn').onclick=()=>{
+  if(BATCH==null) return;
+  const blocked=PAGES.filter(p=>p.block_count>0).length;
+  if(blocked && !confirm(
+      `${blocked} page(s) still have something to fix. Download anyway?`)) return;
+  window.location=`/api/batches/${BATCH}/export?design=${$('#design').value}`;
+  toast('Excel downloaded');
+};
+
+/* ---------------- activity log ---------------- */
+let LOGSEQ=0;
+const LOGCOL={good:'var(--ok)',bad:'var(--bad)',warn:'var(--warn)',
+              step:'var(--brand)',info:'var(--muted)'};
+const LOGICO={good:'✓',bad:'✗',warn:'!',step:'▸',info:'·'};
+
+async function pollLog(){
+  let j;
+  try{ j=await (await fetch(`/api/log?after=${LOGSEQ}`)).json(); }catch(e){ return; }
+  if(!j.events?.length) return;
+  const box=$('#logBox');
+  if(!LOGSEQ) box.innerHTML='';
+  const detail=$('#logDetail').checked;
+  const atBottom = box.scrollHeight-box.scrollTop-box.clientHeight < 40;
+  for(const e of j.events){
+    LOGSEQ=Math.max(LOGSEQ,e.seq);
+    const time=new Date(e.t*1000).toLocaleTimeString([], {hour12:false});
+    const d=document.createElement('div');
+    d.style.cssText='display:flex;gap:8px;font-size:13px;padding:2px 0;line-height:1.45';
+    d.innerHTML=`<span class="tiny" style="font-variant-numeric:tabular-nums;
+                   flex:none;opacity:.65">${time}</span>
+      <span style="color:${LOGCOL[e.level]||'inherit'};flex:none;width:12px;
+                   font-weight:700">${LOGICO[e.level]||'·'}</span>
+      <span style="flex:1">${esc(e.message)}${
+        e.detail?`<span class="tiny logdet"${detail?'':' hidden'}> — ${esc(e.detail)}</span>`:''}</span>`;
+    box.appendChild(d);
+  }
+  while(box.children.length>400) box.removeChild(box.firstChild);
+  if(atBottom) box.scrollTop=box.scrollHeight;
+}
+$('#logDetail').onchange=e=>
+  $$('.logdet').forEach(s=>s.hidden=!e.target.checked);
+
+(async()=>{
+  try{
+    const ds=await (await fetch('/api/export-designs')).json();
+    $('#design').innerHTML=ds.map(d=>`<option value="${d.key}">${esc(d.label)}</option>`).join('');
+    $('#design').value='all';
+  }catch(e){}
+  // A reload must not lose the session: pick up the most recent batch so the
+  // stats, review queue and export button survive an accidental refresh.
+  try{
+    const bs=await (await fetch('/api/batches')).json();
+    if(bs.length){
+      BATCH=bs[0].id;
+      $('#exportBtn').disabled=false; $('#exportHint').textContent='';
+      poll();
+    }
+  }catch(e){}
+  drawStats(0); drawBatches(); health(); pollLog();
+  // deep link: #review / #data / #upload
+  const want=location.hash.replace('#','');
+  if(['home','upload','progress','review','export','data'].includes(want)) show(want);
+  setInterval(health,15000);
+  // Polled independently of the page list so the feed keeps moving even while
+  // a long page is still being read -- that gap is exactly when someone
+  // watching wants to know something is happening.
+  setInterval(pollLog,1200);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Tooling-only dependencies. NOT needed to run the application.
+#
+# requirements.txt is what ships to the client and what the Docker image
+# installs; keeping these out of it means a deployment does not carry a
+# plotting library it never imports.
+#
+#   ./.venv/bin/pip install -r requirements-dev.txt
+#
+# Needed by:
+#   python-docx   tools/build_tech_doc.py and tools/doc_content_*.py
+#                 (builds TIMESHEET-TECHNICAL-DOCUMENTATION.docx)
+#   matplotlib    tools/doc_diagrams.py (regenerates docs/diagrams/*.png)
+#
+# Versions are the ones this project is known to build with.
+python-docx==1.2.0
+matplotlib==3.11.1

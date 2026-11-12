@@ -1,0 +1,31 @@
+# Keep the build context small and keep client data OUT of the image.
+#
+# The image contains code + OCR models only. Everything the app reads or writes
+# at runtime (roster, uploads, database, exports) arrives through the /data
+# volume mount instead.
+
+.venv/
+venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# Real client documents -- must never be baked into a distributable image.
+Timesheet - Delhi 2026-2027/
+samples/
+demo/
+
+# Runtime + evaluation state. Regenerated on the target; some of it is large.
+data/
+deploy/
+dist/
+
+# Development-only tooling and notes.
+tools/
+docs/
+*.log
+*.md
+!README.md
+
+.git/
+.DS_Store

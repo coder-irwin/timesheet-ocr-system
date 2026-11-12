@@ -1,0 +1,5 @@
+# Caddy basic_auth user file. Real file is gitignored.
+# Generate a hash:  docker run --rm caddy caddy hash-password --plaintext "YOUR_PASSWORD"
+# Then:             <username> <bcrypt-hash>
+team <REPLACE-WITH-BCRYPT-HASH>
+client <REPLACE-WITH-BCRYPT-HASH>

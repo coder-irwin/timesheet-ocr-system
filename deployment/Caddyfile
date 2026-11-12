@@ -1,0 +1,20 @@
+# HTTPS (Let's Encrypt) + per-person logins. Users live in gcp/users.caddy
+# (one line each: "name hash"); manage them with gcp/user.sh — never edit hashes by hand.
+{$SITE} {
+    encode gzip
+    basic_auth {
+        import users.caddy
+    }
+    # Tell the app who is signed in, so every edit/export carries the person's name.
+    reverse_proxy timesheet:8077 {
+        # Set (not append) the signed-in name: a browser's own X-Remote-User
+        # is replaced, so nobody can claim to be someone else.
+        header_up X-Remote-User {http.auth.user.id}
+    }
+    request_body {
+        max_size 512MB
+    }
+    log {
+        output file /data/caddy/access.log
+    }
+}
