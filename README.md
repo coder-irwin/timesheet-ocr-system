@@ -10,6 +10,28 @@ or employee record is sent to any external service.
 
 ---
 
+## Start here
+
+| What you want to do | Read this | How long |
+|---|---|---|
+| **See it working on my own machine** | [`RUN-IT-ON-YOUR-COMPUTER.md`](RUN-IT-ON-YOUR-COMPUTER.md) | 20 min |
+| **Put it online for my team** | [`PUT-IT-ONLINE.md`](PUT-IT-ONLINE.md) | ~1 hour |
+| **Understand what it does** | [`01-WHAT-THIS-IS.md`](01-WHAT-THIS-IS.md) | 10 min |
+| **Understand how it works inside** | [`02-HOW-IT-WORKS.md`](02-HOW-IT-WORKS.md) | 25 min |
+| **Know what it cannot do** | [`10-KNOWN-LIMITATIONS.md`](10-KNOWN-LIMITATIONS.md) | 10 min |
+| **Change or extend the code** | [`06-ACCURACY-AND-TESTING.md`](06-ACCURACY-AND-TESTING.md) first, then [`11-HOW-TO-EXTEND-IT.md`](11-HOW-TO-EXTEND-IT.md) | 40 min |
+| **Deploy on Google Cloud with one command** | [`04-DEPLOY-TO-CLOUD.md`](04-DEPLOY-TO-CLOUD.md) | 30 min |
+| **Deploy on AWS, Azure, a VPS, or your own hardware** | [`15-DEPLOY-TO-ANY-CLOUD.md`](15-DEPLOY-TO-ANY-CLOUD.md) | 1 hour |
+
+The two guides at the top assume nothing and give you every command to paste.
+The numbered documents go deeper and are the reference. Either order works —
+the guides tell you what you are doing, the numbered documents tell you why.
+
+If you read only one thing before promising anything to anyone, make it
+[`10-KNOWN-LIMITATIONS.md`](10-KNOWN-LIMITATIONS.md).
+
+---
+
 ## The problem
 
 Monthly labour timesheets arrive from contractor sites as scanned PDFs and
@@ -99,7 +121,7 @@ point.
 
 | Document | For |
 |---|---|
-| [`01-WHAT-THIS-IS.md`](01-WHAT-THIS-IS.md) | Anyone. No technical knowledge assumed |
+| [`01-WHAT-THIS-IS.md`](01-WHAT-THIS-IS.md) | What the system is, and what its accuracy figures honestly mean |
 | [`02-HOW-IT-WORKS.md`](02-HOW-IT-WORKS.md) | The architecture and the three stages |
 | [`03-SETUP-ON-A-LAPTOP.md`](03-SETUP-ON-A-LAPTOP.md) | Running it, start to finish |
 | [`04-DEPLOY-TO-CLOUD.md`](04-DEPLOY-TO-CLOUD.md) | Deploying to your own cloud project |
@@ -125,23 +147,15 @@ with their numbers so nobody rediscovers them.
 
 ```bash
 cd source-code
-python3 -m venv .venv
-./.venv/bin/pip install -r requirements.txt
-./run.sh                      # http://127.0.0.1:8077
-```
-
-Or with Docker, which needs no Python:
-
-```bash
-cd source-code
 docker build -t timesheet-app:local .
+mkdir -p data
 docker run --rm -p 8077:8077 -v "$PWD/data:/data" timesheet-app:local
 ```
 
-Full instructions, including the verification step, are in
-[`03-SETUP-ON-A-LAPTOP.md`](03-SETUP-ON-A-LAPTOP.md).
+Then open **http://127.0.0.1:8077**.
 
----
+Step by step, with every command explained and a troubleshooting table, in
+[`RUN-IT-ON-YOUR-COMPUTER.md`](RUN-IT-ON-YOUR-COMPUTER.md).
 
 ## Not in this repository
 

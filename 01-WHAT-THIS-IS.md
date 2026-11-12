@@ -1,7 +1,6 @@
 # 01 — What This Is
 
-No technical knowledge is assumed in this document. If a term has to be used,
-it is explained where it first appears.
+Every term is explained where it first appears.
 
 ---
 

@@ -63,6 +63,8 @@ cp "$ROOT/deployment/"*.sh "$ROOT/deployment/"*.py "$ROOT/deployment/Caddyfile" 
    "$ROOT/deployment/docker-compose.prod.yml" "$ROOT/deployment/users.caddy.example" "$STAGE/gcp/" 2>/dev/null || true
 cp -R "$ROOT/deployment/overlay" "$STAGE/gcp/../overlay"
 chmod +x "$STAGE/gcp/"*.sh
+# setup-server.sh runs ON the server; it must travel with the rest.
+cp "$ROOT/deployment/setup-server.sh" "$STAGE/gcp/" 2>/dev/null || true
 echo "  $(ls "$STAGE/gcp" | wc -l | tr -d ' ') files, plus the application overlay"
 
 step "5/5 the image"

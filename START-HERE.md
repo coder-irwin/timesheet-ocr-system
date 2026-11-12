@@ -32,22 +32,24 @@ employee record is sent to any external service.
 
 ## Read in this order
 
-| # | Document | Who it is for |
+| # | Document | What it covers |
 |---|---|---|
-| 01 | `01-WHAT-THIS-IS.md` | **Anyone.** No technical knowledge assumed. Start here if you have never seen the system. |
-| 02 | `02-HOW-IT-WORKS.md` | Developers. The architecture and the three processing stages. |
-| 03 | `03-SETUP-ON-A-LAPTOP.md` | Whoever runs it first. Gets it working on one machine. |
-| 04 | `04-DEPLOY-TO-CLOUD.md` | Whoever deploys it. Step by step onto your own Google Cloud project. |
-| 05 | `05-WHAT-IT-COSTS.md` | Whoever pays for it. Every cost line, with the arithmetic shown. |
+| — | `RUN-IT-ON-YOUR-COMPUTER.md` | **Start here to see it working.** Every command to paste, and a troubleshooting table. |
+| — | `PUT-IT-ONLINE.md` | **Start here to deploy it.** Any provider, or your own hardware. |
+| 01 | `01-WHAT-THIS-IS.md` | What the system is, the problem it solves, and what its accuracy figures honestly mean. |
+| 02 | `02-HOW-IT-WORKS.md` | The architecture and the three processing stages, with the reasoning behind each. |
+| 03 | `03-SETUP-ON-A-LAPTOP.md` | Getting it working on one machine, including the verification step. |
+| 04 | `04-DEPLOY-TO-CLOUD.md` | Step by step onto a Google Cloud project, with the three defects that route uncovered. |
+| 05 | `05-WHAT-IT-COSTS.md` | Every cost line with the arithmetic shown, and what each machine size buys. |
 | 06 | `06-ACCURACY-AND-TESTING.md` | **Read before changing any extraction code.** How accuracy is measured and the rule that protects it. |
-| 07 | `07-CODE-REFERENCE.md` | Developers. Every module, what it does, where to look. |
-| 08 | `08-API-REFERENCE.md` | Anyone integrating with it. All HTTP endpoints. |
-| 09 | `09-DESIGN-DECISIONS.md` | Developers. Why things are the way they are, and what was tried and rejected. |
-| 10 | `10-KNOWN-LIMITATIONS.md` | **Everyone.** What this system does not do. Read it before promising anything to anyone. |
-| 11 | `11-HOW-TO-EXTEND-IT.md` | Developers. Adding a new client form, a new export, a new validation rule. |
-| 12 | `12-OPERATIONS-RUNBOOK.md` | Whoever keeps it running. Day-to-day operations and troubleshooting. |
-| 13 | `13-PACKAGE-CONTENTS.md` | A map of every folder and file in this package. |
-| 14 | `14-VERIFICATION-RECORD.md` | **What was actually tested before handover, and what was not.** Read before trusting any figure. |
+| 07 | `07-CODE-REFERENCE.md` | Every module, what it does, and where to look for a given change. |
+| 08 | `08-API-REFERENCE.md` | All 20 HTTP endpoints, generated from the code. |
+| 09 | `09-DESIGN-DECISIONS.md` | Why things are as they are, and what was tried, measured and rejected. |
+| 10 | `10-KNOWN-LIMITATIONS.md` | What this system does not do. Worth reading before promising anything to anyone. |
+| 11 | `11-HOW-TO-EXTEND-IT.md` | Adding a client form, an export design, or a validation rule. |
+| 12 | `12-OPERATIONS-RUNBOOK.md` | Day-to-day operation, health checks and troubleshooting. |
+| 13 | `13-PACKAGE-CONTENTS.md` | A map of every folder and file. |
+| 14 | `14-VERIFICATION-RECORD.md` | **What was actually tested, and what was not.** Read before trusting any figure. |
 | 15 | `15-DEPLOY-TO-ANY-CLOUD.md` | **AWS, Azure, any VPS, or your own hardware.** Read instead of 04 if you are not on Google Cloud. |
 
 ---

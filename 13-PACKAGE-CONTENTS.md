@@ -17,23 +17,23 @@ A map of this package. Sizes and counts were taken from the package itself.
 
 15 documents, 3,326 lines in total.
 
-| File | Lines | Audience |
+| File | Lines | What it covers |
 |---|---|---|
-| `START-HERE.md` | 100 | Everyone — read first |
-| `01-WHAT-THIS-IS.md` | 161 | Anyone, no technical knowledge needed |
-| `02-HOW-IT-WORKS.md` | 292 | Developers |
-| `03-SETUP-ON-A-LAPTOP.md` | 281 | Whoever runs it first |
-| `04-DEPLOY-TO-CLOUD.md` | 306 | Whoever deploys it |
-| `05-WHAT-IT-COSTS.md` | 188 | Whoever pays for it |
-| `06-ACCURACY-AND-TESTING.md` | 285 | Developers — required before changing extraction |
-| `07-CODE-REFERENCE.md` | 363 | Developers |
-| `08-API-REFERENCE.md` | 175 | Anyone integrating |
-| `09-DESIGN-DECISIONS.md` | 213 | Developers |
-| `10-KNOWN-LIMITATIONS.md` | 201 | Everyone, especially anyone making promises |
-| `11-HOW-TO-EXTEND-IT.md` | 230 | Developers |
-| `12-OPERATIONS-RUNBOOK.md` | 260 | Whoever keeps it running |
-| `13-PACKAGE-CONTENTS.md` | 108 | Reference — this file |
-| `14-VERIFICATION-RECORD.md` | 163 | Everyone — what was tested, and what was not |
+| `START-HERE.md` | 100 | Entry point and reading order |
+| `01-WHAT-THIS-IS.md` | 161 | What the system is and what its figures mean |
+| `02-HOW-IT-WORKS.md` | 292 | Reference |
+| `03-SETUP-ON-A-LAPTOP.md` | 281 | Getting it working on one machine |
+| `04-DEPLOY-TO-CLOUD.md` | 306 | Deploying to Google Cloud |
+| `05-WHAT-IT-COSTS.md` | 188 | Costs, with the arithmetic |
+| `06-ACCURACY-AND-TESTING.md` | 285 | Required before changing extraction code |
+| `07-CODE-REFERENCE.md` | 363 | Reference |
+| `08-API-REFERENCE.md` | 175 | The HTTP API |
+| `09-DESIGN-DECISIONS.md` | 213 | Reference |
+| `10-KNOWN-LIMITATIONS.md` | 201 | What it does not do |
+| `11-HOW-TO-EXTEND-IT.md` | 230 | Reference |
+| `12-OPERATIONS-RUNBOOK.md` | 260 | Day-to-day operation |
+| `13-PACKAGE-CONTENTS.md` | 108 | A map of the package |
+| `14-VERIFICATION-RECORD.md` | 163 | What was tested, and what was not |
 
 ## `source-code/`
 
