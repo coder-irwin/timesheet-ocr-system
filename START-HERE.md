@@ -34,7 +34,6 @@ employee record is sent to any external service.
 
 | # | Document | What it covers |
 |---|---|---|
-| — | `INDEX.md` | **The whole flow in one map.** Stage by stage, with the code and the document for each, plus an A–Z lookup. |
 | — | `RUN-IT-ON-YOUR-COMPUTER.md` | **Start here to see it working.** Every command to paste, and a troubleshooting table. |
 | — | `PUT-IT-ONLINE.md` | **Start here to deploy it.** Any provider, or your own hardware. |
 | 01 | `01-WHAT-THIS-IS.md` | What the system is, the problem it solves, and what its accuracy figures honestly mean. |
