@@ -1,4 +1,9 @@
-# 04 — Deploy to Cloud
+# 04 — Deploy to Cloud (Google Cloud)
+
+> **Not on Google Cloud?** Read
+> [`15-DEPLOY-TO-ANY-CLOUD.md`](15-DEPLOY-TO-ANY-CLOUD.md) instead — AWS, Azure,
+> any VPS provider, or your own hardware. Nothing about this application
+> requires Google Cloud; only the provisioning scripts here do.
 
 How to stand up a production instance on your own Google Cloud project.
 

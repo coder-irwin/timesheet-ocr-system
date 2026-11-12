@@ -111,6 +111,7 @@ point.
 | [`10-KNOWN-LIMITATIONS.md`](10-KNOWN-LIMITATIONS.md) | What it does not do |
 | [`11-HOW-TO-EXTEND-IT.md`](11-HOW-TO-EXTEND-IT.md) | Adding a client form, an export, a rule |
 | [`12-OPERATIONS-RUNBOOK.md`](12-OPERATIONS-RUNBOOK.md) | Day-to-day operation |
+| [`15-DEPLOY-TO-ANY-CLOUD.md`](15-DEPLOY-TO-ANY-CLOUD.md) | **AWS, Azure, any VPS, or bare metal** |
 | [`14-VERIFICATION-RECORD.md`](14-VERIFICATION-RECORD.md) | What was tested, and what was not |
 
 `engineering-history/` holds the development record, including a decision log

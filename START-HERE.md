@@ -48,6 +48,7 @@ employee record is sent to any external service.
 | 12 | `12-OPERATIONS-RUNBOOK.md` | Whoever keeps it running. Day-to-day operations and troubleshooting. |
 | 13 | `13-PACKAGE-CONTENTS.md` | A map of every folder and file in this package. |
 | 14 | `14-VERIFICATION-RECORD.md` | **What was actually tested before handover, and what was not.** Read before trusting any figure. |
+| 15 | `15-DEPLOY-TO-ANY-CLOUD.md` | **AWS, Azure, any VPS, or your own hardware.** Read instead of 04 if you are not on Google Cloud. |
 
 ---
 
