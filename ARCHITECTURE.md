@@ -88,6 +88,81 @@ That minimalism is deliberate, and §6 explains what it buys.
 
 ---
 
+## 2a. Service inventory
+
+Everything that runs, with its port, dependencies, configuration and how to
+check it. Taken from `source-code/deploy/docker-compose.yml` and
+`deployment/docker-compose.prod.yml`.
+
+| | `timesheet` | `caddy` | `ollama` |
+|---|---|---|---|
+| **Container name** | `timesheet-app` | `timesheet-caddy` | — runs on the host, not in a container |
+| **Image / source** | `timesheet-app:2.0.0` (built from `source-code/Dockerfile`) | `caddy:2` (official) | installed via `ollama.com/install.sh` |
+| **Port** | `8077` | `80`, `443` | `11434` |
+| **Reachable from** | **Inside the machine only.** In production `ports` is reset to empty and only `expose` is set | **The internet.** The only public door | **`127.0.0.1` only** |
+| **Purpose** | The application: upload, pipeline, review API, Excel export | HTTPS certificate, login gate, and setting the signed-in person's identity | Reads handwritten headers the OCR cannot resolve |
+| **Depends on** | nothing | `timesheet` (`depends_on`) | nothing |
+| **Configuration** | `config.env` (behaviour), `overlay/app/*.py` (13 bind-mounted files) | `gcp/Caddyfile`, `gcp/users.caddy` (logins), `.env` (`SITE`) | `/etc/systemd/system/ollama.service.d/override.conf` |
+| **Persistent data** | `./data` → `/data` | `caddy_data`, `caddy_config` (named volumes, hold the certificate) | the downloaded model |
+| **Restart policy** | `unless-stopped` | `unless-stopped` | `systemd`, enabled |
+| **Health check** | built in: `curl /api/health` every 30s, 5s timeout, 40s grace, 3 retries | `docker compose ps` | `curl -sf http://127.0.0.1:11434/api/tags` |
+| **Optional?** | No | No — without it there is no HTTPS and no login | **Yes.** Set `TS_VLM_HEADER=0`. Costs ~2 points on handwritten names |
+
+### How they talk to each other
+
+```
+internet ──443──> caddy ──8077──> timesheet ──11434──> ollama
+                                       │                (host-gateway)
+                                       └──> /data  (database, uploads, exports)
+```
+
+Caddy reaches the application over the private Docker network, never over a
+published port. The application reaches Ollama on the host via
+`host.docker.internal`, which is mapped with
+`extra_hosts: host.docker.internal:host-gateway` so it works on Linux as well
+as on Docker Desktop.
+
+### Starting them
+
+One command brings up both containers, with the base file supplying the
+application and the production file layering Caddy in front of it:
+
+```bash
+docker compose -f docker-compose.yml -f gcp/docker-compose.prod.yml \
+  --env-file config.env --env-file .env up -d
+```
+
+Both env files are required. `config.env` holds behaviour; `.env` holds the
+site name used for the certificate.
+
+### Identity, and why the header is *set* not appended
+
+Caddy authenticates, then passes the signed-in username to the application:
+
+```
+header_up X-Remote-User {http.auth.user.id}
+```
+
+`header_up` **sets** the header, replacing anything the browser sent. If it
+appended instead, a browser could supply its own `X-Remote-User` and every
+entry in the audit trail would be forgeable.
+
+### Resource shape
+
+| | |
+|---|---|
+| OCR workers | `TS_WORKERS=2` — two pages read in parallel |
+| OCR threads per worker | `TS_OCR_THREADS=2` |
+| Memory, application | ~2–3 GB under load |
+| Memory, Ollama with the model resident | ~4 GB (`OLLAMA_KEEP_ALIVE=2h` keeps it warm) |
+| Upload limit | 512 MB per request, set in the Caddyfile |
+
+There are no CPU or memory limits set in the compose files. On a dedicated
+machine that is intentional — the pipeline should use what is available. If you
+co-host anything else, add `deploy.resources.limits`.
+
+---
+
 ## 3. The pipeline, stage by stage
 
 ```mermaid
