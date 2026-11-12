@@ -61,7 +61,32 @@ not hold the header model — see `05-WHAT-IT-COSTS.md` for the trade.
 
 ---
 
-## 3. Build the image
+## 3. Stage a deployable layout — do this first
+
+The scripts in `deployment/` were written against the original working
+directory (`gcp/` beside `timesheet-app/`). This repository is organised for
+reading instead, so `deploy_gcp.sh` on its own resolves `APP_DIR` to a
+directory that does not exist and every file it copies lives somewhere else.
+
+One script bridges that:
+
+```bash
+./deployment/prepare-deploy.sh                 # stage only
+./deployment/prepare-deploy.sh --build-image   # stage and build the image too
+```
+
+It creates `_deploy-staging/` containing exactly the layout the deploy script
+expects: `timesheet-app/` with the compose file, `config.env`, the installer and
+`data/` holding the roster and designation vocabulary; `gcp/` with the Caddy
+config, the production compose file and all the deployment scripts; the
+application `overlay/`; and a skeleton restore bundle.
+
+Verified: after running it, every path `deploy_gcp.sh` reads resolves. The only
+thing it cannot produce without Docker is the image, covered next.
+
+Deploy from `_deploy-staging/gcp/`, not from `deployment/`.
+
+## 4. Build the image
 
 The deployment uploads a prebuilt image rather than building on the server, so
 the server needs no build toolchain and the image is identical to the one you
@@ -78,7 +103,7 @@ The result is roughly 320 MB compressed.
 
 ---
 
-## 4. Deploy
+## 5. Deploy
 
 ```bash
 cd deployment
@@ -124,7 +149,7 @@ instead. Everything else is unchanged.
 
 ---
 
-## 5. Restore data, and why this step is not optional
+## 6. Restore data, and why this step is not optional
 
 **`deploy_gcp.sh` on its own produces a machine that will not start.** This is
 the most important thing in this document.
@@ -190,7 +215,7 @@ page history and in the `Audit` sheet of every export.
 
 ---
 
-## 6. Verify before you give anyone the URL
+## 7. Verify before you give anyone the URL
 
 ```bash
 cd source-code
@@ -219,7 +244,7 @@ Note the test reads credentials from a local file and never prints them.
 
 ---
 
-## 7. Three defects this process uncovered
+## 8. Three defects this process uncovered
 
 All three are fixed in the scripts here. They are documented because each one
 failed **silently**, and silent failures are the ones that reach production.
@@ -243,7 +268,7 @@ file offset. This broke a live deploy during this very exercise.
 
 ---
 
-## 8. Turning it off
+## 9. Turning it off
 
 Compute is the overwhelming majority of the cost, and it stops the moment the
 machine stops.
@@ -278,7 +303,7 @@ starting deliberately is simpler and cheaper.
 
 ---
 
-## 9. Backups
+## 10. Backups
 
 The deploy sets up nightly snapshots with seven days kept. Two things to know:
 
