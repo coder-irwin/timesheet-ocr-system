@@ -24,7 +24,9 @@ for i in $(seq 1 60); do
   if gcloud compute ssh "$NAME" --zone "$ZONE" --tunnel-through-iap --command \
       "sudo docker compose -f ~/timesheet-app/docker-compose.yml -f ~/timesheet-app/gcp/docker-compose.prod.yml --env-file ~/timesheet-app/config.env --env-file ~/timesheet-app/.env up -d >/dev/null 2>&1; sudo docker exec timesheet-app sh -c 'curl -sf --max-time 10 http://127.0.0.1:8077/api/health'" 2>/dev/null | grep -q '"ocr_ready":true'; then
     echo
-    echo "READY  https://YOUR-STATIC-IP.nip.io"
+    IP=$(gcloud compute instances describe "$NAME" --zone "$ZONE" \
+           --format='value(networkInterfaces[0].accessConfigs[0].natIP)' 2>/dev/null)
+    echo "READY  https://${IP}.nip.io"
     exit 0
   fi
   printf '.'
